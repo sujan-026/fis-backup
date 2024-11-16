@@ -1,0 +1,157 @@
+// Faculty Research
+
+model FacultyResearchDetails {
+  id                   String   @id @default(uuid())
+  facultyVTUId         String   @unique
+  facultyAICTEId       String?  @unique
+  orcidId              String?  @unique
+  googleScholarId      String?  @unique
+  scopusId             String?  @unique
+  publonsId            String?  @unique
+
+  // Relations
+  nationalJournals     NationalJournal[]
+  internationalJournals InternationalJournal[]
+  nationalConferences  NationalConference[]
+  internationalConferences InternationalConference[]
+  researchGrants       ResearchGrant[]
+  consultancies        Consultancy[]
+  patents              Patent[]
+  researchSupervisions ResearchSupervision[]
+}
+
+model NationalJournal {
+  id                  String   @id @default(uuid())
+  title               String
+  journalName         String
+  issueNo             String?
+  volume              String?
+  yearOfPublication   Int
+  pageNo              String?
+  author1             String
+  author2             String?
+  author3             String?
+  author4             String?
+  publishedUnder      String?  // e.g., WEB OF SCIENCE, SCOPUS
+  impactFactor        Float?
+  quartile            String?  // Q1, Q2, Q3
+  facultyResearch     FacultyResearchDetails @relation(fields: [facultyResearchId], references: [id])
+  facultyResearchId   String
+}
+
+model InternationalJournal {
+  id                  String   @id @default(uuid())
+  title               String
+  journalName         String
+  issueNo             String?
+  volume              String?
+  yearOfPublication   Int
+  pageNo              String?
+  author1             String
+  author2             String?
+  author3             String?
+  author4             String?
+  publishedUnder      String?  // e.g., WEB OF SCIENCE, SCOPUS
+  impactFactor        Float?
+  quartile            String?  // Q1, Q2, Q3
+  facultyResearch     FacultyResearchDetails @relation(fields: [facultyResearchId], references: [id])
+  facultyResearchId   String
+}
+
+model NationalConference {
+  id                  String   @id @default(uuid())
+  title               String
+  journalName         String
+  issueNo             String?
+  volume              String?
+  yearOfPublication   Int
+  pageNo              String?
+  author1             String
+  author2             String?
+  author3             String?
+  author4             String?
+  publishedUnder      String?  // e.g., WEB OF SCIENCE, SCOPUS
+  sponsor             String?
+  venue               String
+  fromDate            DateTime
+  toDate              DateTime
+  facultyResearch     FacultyResearchDetails @relation(fields: [facultyResearchId], references: [id])
+  facultyResearchId   String
+}
+
+model InternationalConference {
+  id                  String   @id @default(uuid())
+  title               String
+  journalName         String
+  issueNo             String?
+  volume              String?
+  yearOfPublication   Int
+  pageNo              String?
+  author1             String
+  author2             String?
+  author3             String?
+  author4             String?
+  publishedUnder      String?  // e.g., WEB OF SCIENCE, SCOPUS
+  sponsor             String?
+  venue               String
+  fromDate            DateTime
+  toDate              DateTime
+  facultyResearch     FacultyResearchDetails @relation(fields: [facultyResearchId], references: [id])
+  facultyResearchId   String
+}
+
+model ResearchGrant {
+  id                     String   @id @default(uuid())
+  title                  String
+  sanctionedDate         DateTime
+  projectPeriod          String
+  amountSanctioned       Float
+  fundedBy               String
+  principalInvestigator  String
+  coPrincipalInvestigator String?
+  phdAwarded             Boolean
+  status                 String
+  facultyResearch        FacultyResearchDetails @relation(fields: [facultyResearchId], references: [id])
+  facultyResearchId      String
+}
+
+model Consultancy {
+  id                     String   @id @default(uuid())
+  sanctionedDate         DateTime
+  projectPeriod          String
+  amountSanctioned       Float
+  fundedBy               String
+  principalInvestigator  String
+  coPrincipalInvestigator String?
+  status                 String
+  facultyResearch        FacultyResearchDetails @relation(fields: [facultyResearchId], references: [id])
+  facultyResearchId      String
+}
+
+model Patent {
+  id                String   @id @default(uuid())
+  title             String
+  areaOfResearch    String
+  patentPeriod      String
+  grantedYear       Int
+  author1           String // Name and designation
+  author2           String?
+  author3           String?
+  author4           String?
+  facultyResearch   FacultyResearchDetails @relation(fields: [facultyResearchId], references: [id])
+  facultyResearchId String
+}
+
+model ResearchSupervision {
+  id                    String   @id @default(uuid())
+  researchScholarName   String
+  universitySeatNumber  String
+  areaOfResearch        String
+  registrationDate      DateTime
+  university            String
+  researcherDesignation String
+  instituteName         String
+  progress              String
+  facultyResearch       FacultyResearchDetails @relation(fields: [facultyResearchId], references: [id])
+  facultyResearchId     String
+}
