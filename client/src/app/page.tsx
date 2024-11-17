@@ -9,13 +9,22 @@ import { jwtDecode } from "jwt-decode";
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [email, setEmail] = useState(""); // For forgot password email input
-  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
-  const [forgotPassword, setForgotPassword] = useState(false); // Toggle between login and forgot password
+  const [showPassword, setShowPassword] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false); // Track forgot password mode
+  const [role, setRole] = useState("faculty"); // Default role
+  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState(""); // For forgot password email
   const router = useRouter();
+
+  const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+
 
     try {
       const response = await fetch("http://localhost:5000/api/login", {
@@ -27,6 +36,14 @@ const LoginPage = () => {
       });
 
       if (response.ok) {
+        // const { token } = await response.json();
+
+        // // Save token to local storage
+        // localStorage.setItem("token", token);
+
+        // // Decode role and route accordingly
+        // const decodedToken = JSON.parse(atob(token.split(".")[1]));
+        // const { role } = decodedToken;
         const { token } = await response.json();
         const decodedToken = jwtDecode(token);
 
@@ -39,20 +56,61 @@ const LoginPage = () => {
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("token", JSON.stringify(decodedToken));
 
-        router.push("/faculty"); // Navigate to faculty page
+        if (user.role === "faculty") {
+          router.push("/faculty");
+        } else if (user.role === "hod") {
+          router.push("/hod");
+        } else if (user.role === "principal") {
+          router.push("/principal");
+        } else if (user.role === "admin") {
+          router.push("/admin");
+        } else {
+          setError("Invalid user role");
+        }
       } else {
-        alert("Invalid credentials");
+        const { message } = await response.json();
+        setError(message || "Login failed");
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error("Error during login:", err);
+      setError("An unexpected error occurred. Please try again.");
     }
   };
 
-  const handleForgotPassword = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert(`Password reset link sent to ${email}`);
-    setForgotPassword(false);
+  const getHeader = () => {
+    switch (role) {
+      case "faculty":
+        return "Faculty Login";
+      case "hod":
+        return "HOD/Principal Login";
+      case "admin":
+        return "Admin Login";
+      default:
+        return "Login";
+    }
   };
+
+  const getPlaceholders = () => {
+    switch (role) {
+      case "faculty":
+        return {
+          username: "Enter Faculty ID",
+          password: "Enter Faculty Password",
+        };
+      case "hod":
+        return {
+          username: "Enter HOD/Principal ID",
+          password: "Enter Password",
+        };
+      case "admin":
+        return { username: "Enter Admin ID", password: "Enter Admin Password" };
+      default:
+        return { username: "Enter Username", password: "Enter Password" };
+    }
+  };
+
+  const { username: usernamePlaceholder, password: passwordPlaceholder } =
+    getPlaceholders();
 
   return (
     <div className="relative min-h-screen w-full">
@@ -72,9 +130,17 @@ const LoginPage = () => {
             />
           </div>
 
+          {error && <p className="text-red-600 text-center">{error}</p>}
+
+          {/* Dynamic Header */}
+          <h2 className="text-2xl font-bold text-center mb-4 text-blue-600">
+            {getHeader()}
+          </h2>
+
           {forgotPassword ? (
+            // Forgot Password Form
             <form onSubmit={handleForgotPassword} className="space-y-6">
-              <div>
+              <div className="relative">
                 <input
                   type="email"
                   value={email}
@@ -99,75 +165,73 @@ const LoginPage = () => {
               </button>
             </form>
           ) : (
+            // Login Form
             <form onSubmit={handleLogin} className="space-y-6">
+              {/* Role Selection */}
+              <div className="flex justify-around mb-6">
+                <button
+                  className={`px-4 py-2 rounded-md ${
+                    role === "faculty"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-blue-100"
+                  }`}
+                  onClick={() => setRole("faculty")}
+                >
+                  Faculty
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-md ${
+                    role === "hod"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-blue-100"
+                  }`}
+                  onClick={() => setRole("hod")}
+                >
+                  HOD/Principal
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-md ${
+                    role === "admin"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-blue-100"
+                  }`}
+                  onClick={() => setRole("admin")}
+                >
+                  Admin
+                </button>
+              </div>
+
+              {/* Username Field */}
               <div className="relative">
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Login ID"
+                  placeholder={usernamePlaceholder}
                   required
                 />
               </div>
 
+              {/* Password Field */}
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Password"
+                  placeholder={passwordPlaceholder}
                   required
                 />
                 <div
                   className="absolute right-3 top-2.5 text-gray-400 cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M2.458 12C3.732 7.943 7.486 5 12 5c4.514 0 8.268 2.943 9.542 7-1.274 4.057-5.028 7-9.542 7-4.514 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M2.458 12C3.732 7.943 7.486 5 12 5c4.514 0 8.268 2.943 9.542 7-1.274 4.057-5.028 7-9.542 7-4.514 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  )}
+                  {showPassword ? "Hide" : "Show"}
                 </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="flex space-x-4">
                 <button
                   type="button"

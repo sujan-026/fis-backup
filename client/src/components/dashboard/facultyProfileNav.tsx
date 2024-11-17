@@ -1,18 +1,24 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 
-export function NavLinks() {
+export function FacultyProfileNav() {
+  const searchParams = useSearchParams();
   const pathname = usePathname();
+  const facultyId = searchParams.get("facultyId");
+
+  if (!facultyId) {
+    throw new Error("Faculty ID is missing in URL parameters.");
+  }
 
   return (
     <nav className="flex items-center justify-end gap-4 mr-4 mt-2 text-xl text-blue-500 font-bold">
       <Link
         className={`link hover:underline underline-offset-3 ${
-          pathname === "/faculty/profile" ? "text-purple-500" : ""
+          pathname === "/faculty" ? "text-purple-500" : ""
         }`}
-        href="/"
+        href={`/faculty`}
       >
         Home
       </Link>
@@ -20,7 +26,7 @@ export function NavLinks() {
         className={`link hover:underline underline-offset-3 ${
           pathname === "/faculty/profile" ? "text-purple-500" : ""
         }`}
-        href="/faculty/faculty_reg"
+        href={`/faculty/profile?facultyId=${facultyId}`}
       >
         Personal Details
       </Link>
@@ -30,7 +36,7 @@ export function NavLinks() {
             ? "text-purple-500"
             : ""
         }`}
-        href="/faculty/faculty_reg/profile/academic-details"
+        href={`/faculty/profile/academic-details?facultyId=${facultyId}`}
       >
         Academic Details
       </Link>
@@ -40,7 +46,7 @@ export function NavLinks() {
             ? "text-purple-500"
             : ""
         }`}
-        href="/faculty/faculty_reg/profile/research-details"
+        href={`/faculty/profile/research-details?facultyId=${facultyId}`}
       >
         Research Details
       </Link>

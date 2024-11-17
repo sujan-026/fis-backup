@@ -1,81 +1,87 @@
 "use client";
-import React, {useEffect, useState} from "react";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import FacultyDashboard from "@/components/dashboard/facultyDashboard";
 
 const Dashboard = () => {
-  const router = useRouter();
+  const [role, setRole] = useState("");
+  const [facultyId, setFacultyId] = useState("");
   const [teacherName, setTeacherName] = useState("");
-
-  const currentDate = new Date();
-
-  const formattedDate = currentDate.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const formattedTime = currentDate.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  // const [facultyData, setFacultyData] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
-    // Fetch the teacher's name from local storage and update the state
-    const user = localStorage.getItem("user");
-    if (user) {
-      setTeacherName(JSON.parse(user).username);
+    const token = localStorage.getItem("token");
+    if (token) {
+      const { role, facultyId } = JSON.parse(token);
+      console.log(role, facultyId);
+      setRole(role);
+      setFacultyId(facultyId);
+      setTeacherName(localStorage.getItem("username") || "User");
     } else {
-      throw new Error("Teacher name not found in local storage");
+      router.push("/login");
     }
   }, []);
 
-  return (
-    <div className="min-h-screen">
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-blue-800">
-            {(() => {
-              const currentHour = currentDate.getHours();
-              if (currentHour < 12) return `Good Morning, ${teacherName}`;
-              if (currentHour < 18) return `Good Afternoon, ${teacherName}`;
-              return `Good Evening, ${teacherName}`;
-            })()}
-          </h2>
-        </div>
+  // useEffect(() => {
+  //   if (role === "HOD") {
+  //     fetch(`/api/facultyacademicdetails?department= Computer Science`) // HOD's faculty list
+  //       .then((res) => res.json())
+  //       .then((data) => setFacultyData(data?.data || []));
+  //   } else if (role === "PRINCIPAL") {
+  //     fetch("/api/facultypersonalDetails") // Principal's all faculty list
+  //       .then((res) => res.json())
+  //       .then((data) => setFacultyData(data?.data || []));
+  //   }
+  // }, [role, facultyId]);
 
-        {/* Dashboard Title */}
-        {/* <div className="bg-blue-500 text-white p-6 rounded-lg mb-6">
-          <h3 className="text-xl font-semibold">Faculty Dashboard</h3>
-        </div> */}
+  // const renderFacultyCards = () =>
+  //   facultyData.map((faculty: any) => (
+  //     <button
+  //       key={faculty.facultyId}
+  //       className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-4"
+  //       onClick={() =>
+  //         router.push(
+  //           `/faculty/profile?facultyId=${faculty.facultyId}`
+  //         )
+  //       }
+  //     >
+  //       {faculty.firstName} {faculty.lastName}
+  //     </button>
+  //   ));
 
-        {/* Date and Time */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="text-gray-600">{formattedDate}</div>
-          <div className="text-gray-600">{formattedTime}</div>
-        </div>
-
-        {/* Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { title: "My courses", path: "/faculty/attendance" },
-            { title: "Mentees", path: "/faculty/mentors" },
-            { title: "Exam Details", path: "/faculty/exam-details" },
-          ].map((item, index) => (
-            <button
-              key={index}
-              onClick={() => router.push(item.path)}
-              className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-6 text-center transition-colors"
-            >
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-            </button>
-          ))}
-        </div>
+  if (role === "faculty") {
+    return (
+      <div>
+        <FacultyDashboard />
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (role === "hod" || role === "PRINCIPAL") {
+    return (
+      <div>
+        <h2>Welcome, {teacherName}</h2>
+        {/* <div>{role === "hod" ? "Department Faculty" : "All Faculty"}</div>
+        <div className="grid grid-cols-3 gap-4">{renderFacultyCards()}</div> */}
+      </div>
+    );
+  }
+
+  if (role === "admin") {
+    return (
+      <div>
+        <h2>Admin Dashboard</h2>
+        <button onClick={() => router.push("/admin/test")}>
+          Manage Faculty
+        </button>
+        <button onClick={() => router.push("/admin/test")}>Reports</button>
+      </div>
+    );
+  }
+
+  return <div>Loading...</div>;
 };
 
 export default Dashboard;

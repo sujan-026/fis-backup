@@ -52,3 +52,81 @@
 //     return NextResponse.json({ success: false, error: "Failed to fetch faculty education data" }, { status: 500 });
 //   }
 // }
+
+
+import prisma from "@/app/lib/db";
+import { NextResponse } from "next/server";
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    if(body){
+      console.log({body})
+    }else{
+      console.log("Error");
+    }
+
+    const { personalData } = body;
+
+    const newFacultyData = {
+      // Personal details
+        facultyId: personalData.facultyI,
+        program: personalData.program,
+        usnSsn: personalData.usnSsn,
+        schoolCollege: personalData.schoolCollege,
+        specialization: personalData.specialization,
+        mediumOfInstruction: personalData.mediumOfInstruction,  
+        passClass: personalData.passClass,
+    };
+
+    // console.log(`Faculty Data creation: ${newFacultyData}`);
+    const newFaculty = await prisma.faccultyEducation.create({
+      data: newFacultyData,
+    });
+
+    return NextResponse.json({ success: true, data: newFaculty });
+  } catch (error) {
+    console.error("Error creating faculty:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to create faculty" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    // Extract `facultyId` from query parameters
+    const url = new URL(req.url);
+    const facultyId = url.searchParams.get("facultyId");
+    if (!facultyId) {
+      return NextResponse.json(
+        { success: false, error: "Faculty ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Fetch faculty details from the database
+    const allFaculty = await prisma.faccultyEducation.findFirst({
+      where: {
+        facultyId: facultyId,
+      },
+    });
+
+    if (!allFaculty) {
+      return NextResponse.json(
+        { success: false, error: "Faculty not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data: allFaculty });
+  } catch (error) {
+    console.error("Error fetching faculty:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch faculty" },
+      { status: 500 }
+    );
+  }
+}
+
+

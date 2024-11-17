@@ -15,6 +15,7 @@ import FormNavigation from "@/components/FormNavigation";
 import { FormProvider } from "@/hooks/FormProvider";
 import Header from "@/components/ui/header";
 import { NavLinks } from "@/components/ui/nav-links";
+import axios from "axios";
 
 type Inputs = z.infer<typeof facultyAcademicDetailsSchema>;
 
@@ -55,16 +56,11 @@ const steps: Step[] = [
   },
   {
     id: "Step 4",
-    name: "Publications and Awards",
-    fields: ["publicationsSchema"],
-  },
-  {
-    id: "Step 5",
     name: "Awards and Recognitions",
     fields: ["awardsSchema", "recognitionsSchema"],
   },
   {
-    id: "Step 6",
+    id: "Step 5",
     name: "Extracurricular Details",
     fields: [
       "responsibilitiesSchema",
@@ -72,7 +68,7 @@ const steps: Step[] = [
       "outreachSchema",
     ],
   },
-  { id: "Step 7", name: "Complete", fields: [] },
+  { id: "Step 6", name: "Complete", fields: [] },
 ];
 
 export default function Form() {
@@ -130,12 +126,6 @@ export default function Form() {
   } = useFieldArray({ control, name: "invitedTalksSchema" });
 
   const {
-    fields: publications,
-    append: appendPublications,
-    remove: removePublications,
-  } = useFieldArray({ control, name: "publicationsSchema" });
-
-  const {
     fields: responsibilities,
     append: appendResponsibilities,
     remove: removeResponsibilities,
@@ -165,11 +155,39 @@ export default function Form() {
     remove: removeAwards,
   } = useFieldArray({ control, name: "awardsSchema" });
 
-  const processForm: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
-    reset();
+  const processForm: SubmitHandler<Inputs> = async (data) => {
+    console.log("All data", data);
+    try {
+      const response = await axios.post("/api/facultyacademicdetails", {
+        // Include academic schema with default values if not available in your form
+        academicSchema: {
+          qualification: data.academicSchema.qualification || "Not Specified",
+          department: data.academicSchema.department || "Not Specified",
+          designation: data.academicSchema.designation || "Not Specified",
+          level: data.academicSchema.level || "Not Specified",
+        },
+        previousTeachingExperienceSchema: data.previousTeachingExperienceSchema || [],
+        teachingExperienceIndustrySchema: data.teachingExperienceIndustrySchema || [],
+        teachingExperienceResearchSchema: data.teachingExperienceResearchSchema || [],
+        eventsAttendedSchema: data.eventsAttendedSchema || [],
+        eventsOrganizedSchema: data.eventsOrganizedSchema || [],
+        invitedTalksSchema: data.invitedTalksSchema || [],
+        responsibilitiesSchema: data.responsibilitiesSchema || [],
+        extracurricularsSchema: data.extracurricularsSchema || [],
+        outreachSchema: data.outreachSchema || [],
+        recognitionsSchema: data.recognitionsSchema || [],
+        awardsSchema: data.awardsSchema || [],
+      });
+      
+      if (response.status === 200) {
+        console.log(response);
+        // Handle success (e.g., show success message, redirect, etc.)
+      }
+    } catch (error) {
+      console.error(error);
+      // Handle error (e.g., show error message)
+    }
   };
-
   type FieldName = keyof Inputs;
 
   const nextButtonFunction = async () => {
@@ -302,11 +320,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`previousTeachingExperienceSchema[${index}].slNo`}
-                    type="number"
-                  />
+                  
 
                   <FormField
                     label="Name of Institute"
@@ -341,7 +355,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendPreviousTeaching({
-                    slNo: "",
+
                     instituteName: "",
                     fromDate: new Date(),
                     toDate: new Date(),
@@ -361,11 +375,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`teachingExperienceIndustrySchema[${index}].slNo`}
-                    type="number"
-                  />
+                  
 
                   <FormField
                     label="Organization"
@@ -406,7 +416,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendTeachingIndustry({
-                    slNo: "",
+
                     organization: "",
                     fromDate: new Date(),
                     toDate: new Date(),
@@ -427,11 +437,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`teachingExperienceResearchSchema[${index}].slNo`}
-                    type="number"
-                  />
+                  
 
                   <FormField
                     label="Organization"
@@ -471,7 +477,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendTeachingResearch({
-                    slNo: "",
+
                     organization: "",
                     fromDate: new Date(),
                     toDate: new Date(),
@@ -500,11 +506,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`eventsAttendedSchema[${index}].slNo`}
-                    type="number"
-                  />
+                 
 
                   <FormField
                     label="Type of Event"
@@ -557,7 +559,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendEventsAttended({
-                    slNo: "",
+
                     typeOfEvent: "",
                     title: "",
                     fromDate: new Date(),
@@ -580,11 +582,6 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`eventsOrganizedSchema[${index}].slNo`}
-                    type="number"
-                  />
 
                   <FormField
                     label="Type of Event"
@@ -643,7 +640,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendEventsOrganized({
-                    slNo: "",
+
                     typeOfEvent: "",
                     title: "",
                     fromDate: new Date(),
@@ -667,11 +664,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`invitedTalksSchema[${index}].slNo`}
-                    type="number"
-                  />
+                  
 
                   <FormField
                     label="Type of Event"
@@ -730,7 +723,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendInvitedTalks({
-                    slNo: "",
+
                     typeOfEvent: "",
                     title: "",
                     fromDate: new Date(),
@@ -754,113 +747,6 @@ export default function Form() {
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Publications
-              </h2>
-
-              {publications.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="grid grid-cols-1 gap-6 sm:grid-cols-2"
-                >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`publicationsSchema[${index}].slNo`}
-                    type="number"
-                  />
-
-                  <div>
-                    <label
-                      htmlFor="directCorr"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Direct/Correspondence
-                    </label>
-                    <select
-                      id="directCorr"
-                      {...register(
-                        `publicationsSchema.${index}.typeOfPublication`
-                      )}
-                      className="mt-1 block w-full p-1 py-2.5 rounded-md border bg-gray-50 border-gray-300 shadow-sm"
-                    >
-                      <option value="Direct">Direct</option>
-                      <option value="Correspondence">Correspondence</option>
-                    </select>
-                    {errors.publicationsSchema?.[index]?.typeOfPublication && (
-                      <p className="mt-2 text-sm text-red-600">
-                        {
-                          errors.publicationsSchema[index].typeOfPublication
-                            .message
-                        }
-                      </p>
-                    )}
-                  </div>
-
-                  <FormField
-                    label="N/IN"
-                    stepsReference={`publicationsSchema[${index}].n_In`}
-                    type="text"
-                  />
-
-                  <FormField
-                    label="Name of journal"
-                    stepsReference={`publicationsSchema[${index}].nameOfJournal`}
-                    type="text"
-                  />
-
-                  <FormField
-                    label="Volume and Page"
-                    stepsReference={`publicationsSchema[${index}].volumeAndPage`}
-                    type="text"
-                  />
-                  <FormField
-                    label="DOI"
-                    stepsReference={`publicationsSchema[${index}].doi`}
-                    type="text"
-                  />
-                  <FormField
-                    label="Impact Factor"
-                    stepsReference={`publicationsSchema[${index}].impactFactor`}
-                    type="text"
-                  />
-                  <div className="col-span-2 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => removePublications(index)}
-                      className="text-red-500 text-sm"
-                    >
-                      Remove Button
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={() =>
-                  appendPublications({
-                    slNo: "",
-                    typeOfPublication: "Journal",
-                    n_In: "",
-                    nameOfJournal: "",
-                    volumeAndPage: "",
-                    doi: "",
-                    impactFactor: "",
-                  })
-                }
-                className="text-blue-500 text-sm"
-              >
-                + Add Publications
-              </button>
-            </motion.div>
-          )}
-
-          {currentStep === 4 && (
-            <motion.div
-              initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                 Awards and Recognitions
               </h2>
 
@@ -869,11 +755,6 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`awardsSchema[${index}].slNo`}
-                    type="number"
-                  />
 
                   <FormField
                     label="Award"
@@ -896,7 +777,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendAwards({
-                    slNo: "",
+
                     awardRecieved: "",
                   })
                 }
@@ -914,12 +795,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`recognitionsSchema[${index}].slNo`}
-                    type="number"
-                  />
-
+                  
                   <FormField
                     label="Recognition"
                     stepsReference={`recognitionsSchema[${index}].recognitionRecieved`}
@@ -940,7 +816,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendRecognitions({
-                    slNo: "",
+
                     recognitionRecieved: "",
                   })
                 }
@@ -951,7 +827,7 @@ export default function Form() {
             </motion.div>
           )}
 
-          {currentStep === 5 && (
+          {currentStep === 4 && (
             <motion.div
               initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -966,11 +842,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`responsibilitiesSchema[${index}].slNo`}
-                    type="number"
-                  />
+                
 
                   <FormField
                     label="Responsibility"
@@ -1003,7 +875,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendResponsibilities({
-                    slNo: "",
+
                     additionalResponsibilitiesHeld: "",
                     fromDate: new Date(),
                     toDate: new Date(),
@@ -1023,11 +895,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`extracurricularsSchema[${index}].slNo`}
-                    type="number"
-                  />
+    
 
                   <FormField
                     label="Type of Event"
@@ -1087,7 +955,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendExtracurriculars({
-                    slNo: "",
+
                     typeOfEvent: "",
                     titleOfEvent: "",
                     fromDate: new Date(),
@@ -1111,11 +979,7 @@ export default function Form() {
                   key={field.id}
                   className="grid grid-cols-1 gap-6 sm:grid-cols-2"
                 >
-                  <FormField
-                    label="S.No"
-                    stepsReference={`outreachSchema[${index}].slNo`}
-                    type="number"
-                  />
+            
 
                   <FormField
                     label="Type of Event"
@@ -1163,7 +1027,7 @@ export default function Form() {
                 type="button"
                 onClick={() =>
                   appendOutreach({
-                    slNo: "",
+
                     activity: "",
                     role: "",
                     fromDate: new Date(),
@@ -1178,7 +1042,7 @@ export default function Form() {
             </motion.div>
           )}
 
-          {currentStep === 6 && (
+          {currentStep === 5 && (
             <motion.div
               initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}

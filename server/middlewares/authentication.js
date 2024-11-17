@@ -57,7 +57,7 @@ const authenticateUser = async (req, res) => {
   try {
     // Find the user by username
     const userDetails = await prisma.User.findUnique({
-      where: { password: password },
+      where: { password: password, username: username },
     });
 
     console.log("User details:", userDetails);

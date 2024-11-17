@@ -1,5 +1,4 @@
-import { area } from "framer-motion/client";
-import { date, z } from "zod";
+import { z } from "zod";
 
 export const facultyResearchSchema = z.object({
   vtuFacultyId: z.string().min(1, { message: "VTU Faculty ID is required" }),
@@ -15,7 +14,6 @@ export const facultyResearchSchema = z.object({
 
 export const nationalJournalDetailsSchema = z.array(
   z.object({
-    slNo: z.string().min(1, { message: "Serial number is required" }),
     titleOfResearchPaper: z.string().min(1, { message: "Title is required" }),
     nameOfJournal: z
       .string()
@@ -28,9 +26,9 @@ export const nationalJournalDetailsSchema = z.array(
     pageNoFrom: z.string().min(1, { message: "Page number from is required" }),
     pageNoTo: z.string().min(1, { message: "Page number to is required" }),
     author01: z.string().min(1, { message: "Author 01 is required" }),
-    author02: z.string().min(1, { message: "Author 02 is required" }),
-    author03: z.string().min(1, { message: "Author 03 is required" }),
-    author04: z.string().min(1, { message: "Author 04 is required" }),
+    author02: z.string(),
+    author03: z.string(),
+    author04: z.string(),
     publishedUnder: z.enum(["Web of Science", "Scopus", "Q1", "Q2", "Q3"], {
       message: "Please select a publication",
     }),
@@ -40,7 +38,6 @@ export const nationalJournalDetailsSchema = z.array(
 
 export const internationalJournalDetailsSchema = z.array(
   z.object({
-    slNo: z.string().min(1, { message: "Serial number is required" }),
     titleOfResearchPaper: z.string().min(1, { message: "Title is required" }),
     nameOfJournal: z
       .string()
@@ -53,9 +50,9 @@ export const internationalJournalDetailsSchema = z.array(
     pageNoFrom: z.string().min(1, { message: "Page number from is required" }),
     pageNoTo: z.string().min(1, { message: "Page number to is required" }),
     author01: z.string().min(1, { message: "Author 01 is required" }),
-    author02: z.string().min(1, { message: "Author 02 is required" }),
-    author03: z.string().min(1, { message: "Author 03 is required" }),
-    author04: z.string().min(1, { message: "Author 04 is required" }),
+    author02: z.string(),
+    author03: z.string(),
+    author04: z.string(),
     publishedUnder: z.enum(
       ["Web of Science", "Scopus", "Q1", "Q2", "Q3", "SCI"],
       {
@@ -68,7 +65,6 @@ export const internationalJournalDetailsSchema = z.array(
 
 export const nationalConferenceDetailsSchema = z.array(
   z.object({
-    slNo: z.string().min(1, { message: "Serial number is required" }),
     titleOfResearchPaper: z.string().min(1, { message: "Title is required" }),
     nameOfJournal: z
       .string()
@@ -81,9 +77,9 @@ export const nationalConferenceDetailsSchema = z.array(
     pageNoFrom: z.string().min(1, { message: "Page number from is required" }),
     pageNoTo: z.string().min(1, { message: "Page number to is required" }),
     author01: z.string().min(1, { message: "Author 01 is required" }),
-    author02: z.string().min(1, { message: "Author 02 is required" }),
-    author03: z.string().min(1, { message: "Author 03 is required" }),
-    author04: z.string().min(1, { message: "Author 04 is required" }),
+    author02: z.string(),
+    author03: z.string(),
+    author04: z.string(),
     publishedUnder: z.enum(
       ["Web of Science", "Scopus", "Q1", "Q2", "Q3", "SCI"],
       {
@@ -96,7 +92,6 @@ export const nationalConferenceDetailsSchema = z.array(
 
 export const internationalConferenceDetailsSchema = z.array(
   z.object({
-    slNo: z.string().min(1, { message: "Serial number is required" }),
     titleOfResearchPaper: z.string().min(1, { message: "Title is required" }),
     nameOfJournal: z
       .string()
@@ -109,9 +104,9 @@ export const internationalConferenceDetailsSchema = z.array(
     pageNoFrom: z.string().min(1, { message: "Page number from is required" }),
     pageNoTo: z.string().min(1, { message: "Page number to is required" }),
     author01: z.string().min(1, { message: "Author 01 is required" }),
-    author02: z.string().min(1, { message: "Author 02 is required" }),
-    author03: z.string().min(1, { message: "Author 03 is required" }),
-    author04: z.string().min(1, { message: "Author 04 is required" }),
+    author02: z.string(),
+    author03: z.string(),
+    author04: z.string(),
     publishedUnder: z.enum(
       ["Web of Science", "Scopus", "Q1", "Q2", "Q3", "SCI"],
       {
@@ -124,13 +119,12 @@ export const internationalConferenceDetailsSchema = z.array(
 
 export const researchGrantsSchema = z.array(
   z.object({
-    slNo: z.string().min(1, { message: "Serial number is required" }),
     titleOfProject: z.string().min(1, { message: "Title is required" }),
     sanctionedDate: z.coerce.date({ message: "Sanctioned date is required" }),
-    timePeriodOfProject: z.number({
+    timePeriodOfProject: z.string().min(1,{
       message: "Time period of project is required",
     }),
-    sanctionedAmount: z.number({ message: "Sanctioned amount is required" }),
+    sanctionedAmount: z.string().min(1,{ message: "Sanctioned amount is required" }),
     fundedBy: z.string().min(1, { message: "Funded by is required" }),
     principalInvestigatorDesignation: z
       .string()
@@ -155,12 +149,11 @@ export const researchGrantsSchema = z.array(
 
 export const consultancySchema = z.array(
   z.object({
-    slNo: z.string().min(1, { message: "Serial number is required" }),
     sanctionedDate: z.coerce.date({ message: "Sanctioned date is required" }),
-    timePeriodOfProject: z.number({
+    timePeriodOfProject: z.string().min(1,{
       message: "Time period of project is required",
     }),
-    sanctionedAmount: z.number({ message: "Sanctioned amount is required" }),
+    sanctionedAmount: z.string().min(1,{ message: "Sanctioned amount is required" }),
     fundedBy: z.string().min(1, { message: "Funded by is required" }),
     principalInvestigatorDesignation: z
       .string()
@@ -182,23 +175,21 @@ export const consultancySchema = z.array(
 
 export const patentsSchema = z.array(
   z.object({
-    slNo: z.string().min(1, { message: "Serial number is required" }),
     titleOfResearchPatent: z.string().min(1, { message: "Title is required" }),
     areaOfResearch: z
       .string()
       .min(1, { message: "Area of research is required" }),
-    patentPeriod: z.number({ message: "Patent period is required" }),
-    patentGrantedYear: z.number({ message: "Patent granted year is required" }),
+    patentPeriod: z.string().min(0, { message: "Patent period is required" }),
+    patentGrantedYear: z.string().min(0, { message: "Patent granted year is required" }),
     author1: z.string().min(3, { message: "Author 1 is required" }),
-    author2: z.string().min(3, { message: "Author 2 is required" }),
-    author3: z.string().min(3, { message: "Author 3 is required" }),
-    author4: z.string().min(3, { message: "Author 4 is required" }),
+    author2: z.string(),
+    author3: z.string(),
+    author4: z.string(),
   })
 );
 
 export const researchScholarDetailsSchema = z.array(
   z.object({
-    slNo: z.string().min(1, { message: "Serial number is required" }),
     nameOfResearchScholar: z
       .string()
       .min(1, { message: "Name of research scholar is required" }),
@@ -225,6 +216,22 @@ export const researchScholarDetailsSchema = z.array(
     }),
   })
 );
+export const publicationsSchema = z.array(
+  z.object({
+    typeOfPublication: z.enum(["Journal", "Conference","Direct","Correspondence"], {
+      message: "Please select a aStype of publication",
+    }),
+    n_In: z.string().min(1, { message: "N/IN is required" }),
+    nameOfJournal: z
+      .string()
+      .min(1, { message: "Name of journal is required" }),
+    volumeAndPage: z
+      .string()
+      .min(1, { message: "Volume and page is required" }),
+    doi: z.string().min(1, { message: "DOI is required" }),
+    impactFactor: z.string().min(1, { message: "Impact factor is required" }),
+  })
+);
 
 export const facultyResearchDetailsSchema = z.object({
   facultyResearchSchema,
@@ -236,4 +243,5 @@ export const facultyResearchDetailsSchema = z.object({
   consultancySchema,
   patentsSchema,
   researchScholarDetailsSchema,
+  publicationsSchema,
 });

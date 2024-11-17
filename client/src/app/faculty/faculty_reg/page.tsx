@@ -179,36 +179,32 @@ export default function Form() {
   });
 
   const processForm: SubmitHandler<Inputs> = async (data) => {
-    console.log(data);
-    const personalData = data.personalSchema;
-    console.log(personalData);
-    const financialData = data.financialSchema;
-    console.log(financialData);
-    const educationField = data.educationSchema;
-    const dependentsData = data.dependentsSchema;
-    const createdFaculty = await axios.post("/api/facultypersonaldetails", {
-      personalData,
-    });
-    const creatededucation = await axios.post("/api/facultyeducation", {
-      educationField,
-    });
-    const createdFinancial = await axios.post("/api/facultyfinancialdata", {
-      financialData,
-    });
-    const createdDependents = await axios.post("/api/facultydepend", {
-      dependentsData,
-    });
-    if (
-      createdFaculty.data.success &&
-      creatededucation.data.success &&
-      createdFinancial.data.success &&
-      createdDependents.data.success
-    ) {
-      console.log("Data saved successfully");
-    } else {
-      console.error("Error saving data");
+    console.log("Form data:", data);
+
+    try {
+      // Send the schema data directly without nesting under combinedData
+      const response = await axios.post("/api/facultypersonaldetails", {
+        personalSchema: data.personalSchema,
+        financialSchema: data.financialSchema,
+        educationSchema: data.educationSchema,
+        dependentsSchema: data.dependentsSchema,
+      });
+
+      if (response.data.success) {
+        console.log("Data saved successfully:", response.data);
+        // Add your success handling here (e.g., showing a success message, redirecting)
+      } else {
+        console.error("Server returned error:", response.data.error);
+        // Add your error handling here (e.g., showing an error message)
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data || error.message);
+        // Add your error handling here (e.g., showing the specific error message)
+      } else {
+        console.error("Unexpected error:", error);
+      }
     }
-    reset();
   };
 
   type FieldName = keyof Inputs;
@@ -1128,4 +1124,3 @@ export default function Form() {
     </div>
   );
 }
-

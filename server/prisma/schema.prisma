@@ -67,11 +67,11 @@ model FaccultyEducation {
 model FacultyAcademicDetails {
   id                   Int                         @id @default(autoincrement())
   employeeId           String                      @unique
+  facultyId            String                      @unique
   qualification        String
   department           String
   level                String
   designation          String
-  facultyId            String                      @unique
   responsibilities     AddtionalResponsibility[]
   awardsandrecognition AwardAndRecognition[]
   eventsAttended       EventAttended[]
@@ -85,123 +85,12 @@ model FacultyAcademicDetails {
   specializations      Specialization[]
 }
 
-model FacultyResearchDetails {
-  id                   Int                    @id @default(autoincrement())
-  facultyId            String                 @unique
-  orcidId              String?                @unique
-  googleScholarId      String?                @unique
-  scopusId             String?                @unique
-  publonsId            String?                @unique
-  researchId           String?                @unique
-  conferenceandjournal ConferenceAndJournal[]
-  consultancy          Consultancy[]
-  patent               Patent[]
-  publications         Publication[]
-  researchGrant        ResearchGrant[]
-  researchScholar      ResearchScholar[]
-}
-
-model ResearchScholar {
-  id                      Int      @id @default(autoincrement())
-  facultyId               String
-  NameOfResearchScholar   String
-  UinvertySeatNo          String
-  AreaOfResearch          String
-  DateOfResearch          DateTime
-  UniversityRegestration  String
-  DesginationOfSupervisor String
-  NameOfInstitute         String
-  ProgessOfResearch       String
-
-  facultyResearch FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
-}
-
-model ResearchGrant {
-  id                      Int                    @id @default(autoincrement())
-  facultyId               String
-  facultyResearchId       String?
-  name                    String
-  sanctionedDate          DateTime
-  projectPeriod           String
-  amountSanctioned        Float
-  fundedBy                String
-  principalInvestigator   String
-  coPrincipalInvestigator String?
-  phdAwarded              Boolean
-  status                  String
-  facultyResearch         FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
-
-  @@index([facultyId], map: "ResearchGrant_facultyId_fkey")
-}
-
-model Consultancy {
-  id                      String                 @id @default(uuid())
-  facultyId               String
-  facultyResearchId       String?
-  faculty1                String
-  faculty2                String
-  faculty3                String
-  sanctionedDate          DateTime
-  projectPeriod           String
-  amount                  Float
-  principalInvestigator   String
-  coPrincipalInvestigator String?
-  status                  String
-  facultyResearch         FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
-
-  @@index([facultyId], map: "Consultancy_facultyId_fkey")
-}
-
-model ConferenceAndJournal {
-  id                Int                    @id @default(autoincrement())
-  facultyId         String
-  role              String
-  title             String
-  journalName       String
-  issueNo           String?
-  volume            String?
-  yearOfPublication Int
-  pageNo            String?
-  author1           String
-  author2           String?
-  author3           String?
-  author4           String?
-  publishedUnder    String?
-  impactFactor      Float?
-  quartile          String?
-  sponsor           String?
-  venue             String
-  fromDate          DateTime
-  toDate            DateTime
-  facultyResearch   FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
-
-  @@index([facultyId], map: "ConferenceAndJournal_facultyId_fkey")
-}
-
-model Patent {
-  id              String                 @id @default(uuid())
-  facultyId       String
-  areaOfResearch  String
-  nameOfPatent    String
-  patentPeriod    String
-  grantedYear     Int
-  author1         String
-  author2         String?
-  author3         String?
-  author4         String?
-  author5         String?
-  author6         String?
-  facultyResearch FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
-
-  @@index([facultyId], map: "Patent_facultyId_fkey")
-}
-
 model PreviousTeachingExperience {
   id            Int                    @id @default(autoincrement())
+  facultyId     String    @unique             
   instituteName String
   fromDate      DateTime
   toDate        DateTime
-  facultyId     String                 @unique
   faculty       FacultyAcademicDetails @relation(fields: [facultyId], references: [facultyId])
 
   @@index([facultyId], map: "PreviousTeachingExperience_facultyId_fkey")
@@ -289,19 +178,6 @@ model InvitedTalk {
   @@index([facultyId], map: "InvitedTalk_facultyId_fkey")
 }
 
-model Publication {
-  id              Int                    @id @default(autoincrement())
-  publicationType String
-  name            String
-  volume          String?
-  pageNumber      String?
-  doi             String?
-  impactFactor    Float?
-  facultyId       String
-  faculty         FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
-
-  @@index([facultyId], map: "Publication_facultyId_fkey")
-}
 
 model AddtionalResponsibility {
   id                       Int                    @id @default(autoincrement())
@@ -351,6 +227,110 @@ model AwardAndRecognition {
   FacultyAcademicDetails FacultyAcademicDetails @relation(fields: [facultyId], references: [facultyId])
 
   @@index([facultyId], map: "Award_facultyId_fkey")
+}
+
+model FacultyResearchDetails {
+  id                   Int                    @id @default(autoincrement())
+  facultyId            String                 @unique
+  orcidId              String?                @unique
+  googleScholarId      String?                @unique
+  scopusId             String?                @unique
+  publonsId            String?                @unique
+  researchId           String?                @unique
+  patent               Patent[]
+  publications         Publication[]
+  conferenceandjournal ConferenceAndJournal[]
+  researchGrant        ResearchGrant[]
+  consultancy          Consultancy[]
+}
+
+model Patent {
+  id              String                 @id @default(uuid())
+  facultyId       String                 
+  areaOfResearch  String
+  patentPeriod    String
+  grantedYear     Int
+  author1         String
+  author2         String?
+  author3         String?
+  author4         String?
+  author5         String?
+  author6         String?
+  facultyResearch FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
+
+  @@index([facultyId], map: "Patent_facultyId_fkey")
+}
+
+model Publication {
+  id              Int                    @id @default(autoincrement())
+  publicationType String
+  name            String
+  volume          String?
+  pageNumber      String?
+  doi             String?
+  impactFactor    Float?
+  facultyId       String
+  faculty         FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
+
+  @@index([facultyId], map: "Publication_facultyId_fkey")
+}
+
+model ConferenceAndJournal {
+  id                Int                    @id @default(autoincrement())
+  facultyId         String                 
+  role              String
+  title             String
+  journalName       String
+  issueNo           String?
+  volume            String?
+  yearOfPublication Int
+  pageNo            String?
+  author1           String
+  author2           String?
+  author3           String?
+  author4           String?
+  publishedUnder    String? // e.g., WEB OF SCIENCE, SCOPUS
+  impactFactor      Float?
+  quartile          String? // Q1, Q2, Q3
+  sponsor           String?
+  venue             String
+  fromDate          DateTime
+  toDate            DateTime
+  facultyResearch   FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
+
+  @@index([facultyId], map: "ConferenceAndJournal_facultyId_fkey")
+}
+
+model ResearchGrant {
+  id                      Int                    @id @default(autoincrement())
+  facultyId               String                 
+  facultyResearchId       String
+  name                    String
+  sanctionedDate          DateTime
+  projectPeriod           String
+  amountSanctioned        Float
+  fundedBy                String
+  principalInvestigator   String
+  coPrincipalInvestigator String?
+  phdAwarded              Boolean
+  status                  String
+  facultyResearch         FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
+}
+
+model Consultancy {
+  id                      String                 @id @default(uuid())
+  facultyId               String                 
+  facultyResearchId       String
+  faculty1                String
+  faculty2                String
+  faculty3                String
+  sanctionedDate          DateTime
+  projectPeriod           String
+  amount                  Float
+  principalInvestigator   String
+  coPrincipalInvestigator String?
+  status                  String
+  facultyResearch         FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
 }
 
 model User {

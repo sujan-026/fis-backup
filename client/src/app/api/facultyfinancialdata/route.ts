@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     // Set default values for missing fields and create financial data
     const newFinancialData = await prisma.facultyFinancialData.create({
       data: {
-        facultyId: facultyId ?? 1456, // Default facultyId if missing
+        facultyId: facultyId ?? 4237, // Default facultyId if missing
         bankName: bankName ?? 'N/A', // Default bankName if missing
         accountNo: accountNo ?? '000000000000', // Default accountNo if missing
         accountName: accountName ?? 'Unknown', // Default accountName if missing

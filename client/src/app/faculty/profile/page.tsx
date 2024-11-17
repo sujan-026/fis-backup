@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 // "use client";
 // import { useState, useEffect } from "react";
 // import { motion } from "framer-motion";
@@ -1388,7 +1389,7 @@
 
 import { useEffect, useState } from "react";
 import { notFound } from "next/navigation";
-import { NavLinks } from "@/components/ui/nav-links";
+import { FacultyProfileNav } from "@/components/dashboard/facultyProfileNav";
 import Image from "next/image";
 
 export default function FacultyProfile() {
@@ -1438,6 +1439,18 @@ export default function FacultyProfile() {
       children: string[];
     };
   } | null>(null);
+
+  const [facultyEducationDetails, setFacultyEducationDetails] = useState<{
+    data: {
+      facultyId: string;
+      Program: string;
+      usnSsn: string;
+      schoolCollege: string;
+      specialization: string;
+      mediumOfInstruction: string;
+      passClass: string;
+    };
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -1451,14 +1464,25 @@ export default function FacultyProfile() {
           return;
         }
 
-        const response = await fetch(`/api/facultypersonaldetails`);
+        const response = await fetch(
+          `/api/facultypersonaldetails?facultyId=${facultyId}`
+        );
+        const response1 = await fetch(
+          `/api/facultyeducation?facultyId=${facultyId}`
+        );
         if (!response.ok) {
+          notFound();
+          return;
+        }
+        if (!response1.ok) {
           notFound();
           return;
         }
 
         const data = await response.json();
+        const data1 = await response1.json();
         setFacultyDetails(data);
+        setFacultyEducationDetails(data1);
       } catch (error) {
         console.error("Error fetching faculty details:", error);
       } finally {
@@ -1479,7 +1503,7 @@ export default function FacultyProfile() {
 
   return (
     <div>
-      <NavLinks />
+      <FacultyProfileNav />
       <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg">
         <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8">
           <div className="relative">
@@ -1678,6 +1702,50 @@ export default function FacultyProfile() {
               {facultyDetails.data.languages || "N/A"}
             </p>
           </div> */}
+          </div>
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Academic Details
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <p className="text-sm text-gray-500">Program</p>
+              <p className="font-medium text-gray-800">
+                {facultyEducationDetails.data.Program || "N/A"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-gray-500">UsnSsn</p>
+              <p className="font-medium text-gray-800">
+                {facultyEducationDetails.data.usnSsn || "N/A"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-gray-500">School College</p>
+              <p className="font-medium text-gray-800">
+                {facultyEducationDetails.data.schoolCollege || "N/A"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-gray-500">Specialization</p>
+              <p className="font-medium text-gray-800">
+                {facultyEducationDetails.data.specialization || "N/A"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-gray-500">Medium Of Instruction</p>
+              <p className="font-medium text-gray-800">
+                {facultyEducationDetails.data.mediumOfInstruction || "N/A"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-gray-500">Pass Class</p>
+              <p className="font-medium text-gray-800">
+                {facultyEducationDetails.data.passClass || "N/A"}
+              </p>
+            </div>
           </div>
         </div>
 
