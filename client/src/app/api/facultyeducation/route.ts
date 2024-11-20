@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
     const newFacultyData = {
       // Personal details
-        facultyId: personalData.facultyI,
+        facultyId: personalData.facultyId,
         program: personalData.program,
         usnSsn: personalData.usnSsn,
         schoolCollege: personalData.schoolCollege,

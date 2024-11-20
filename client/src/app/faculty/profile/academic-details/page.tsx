@@ -1495,6 +1495,12 @@ export default function AcademicProfile() {
               {academicDetails.data.designation}
             </p>
           </div>
+          <div className="space-y-1">
+            <p className="text-sm text-gray-500">Level</p>
+            <p className="font-medium text-gray-800">
+              {academicDetails.data.level}
+            </p>
+          </div>
         </div>
 
         {/* Responsibilities */}

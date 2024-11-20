@@ -36,14 +36,6 @@ const LoginPage = () => {
       });
 
       if (response.ok) {
-        // const { token } = await response.json();
-
-        // // Save token to local storage
-        // localStorage.setItem("token", token);
-
-        // // Decode role and route accordingly
-        // const decodedToken = JSON.parse(atob(token.split(".")[1]));
-        // const { role } = decodedToken;
         const { token } = await response.json();
         const decodedToken = jwtDecode(token);
 

@@ -87,7 +87,7 @@ model FacultyAcademicDetails {
 
 model PreviousTeachingExperience {
   id            Int                    @id @default(autoincrement())
-  facultyId     String    @unique             
+  facultyId     String                 @unique
   instituteName String
   fromDate      DateTime
   toDate        DateTime
@@ -178,7 +178,6 @@ model InvitedTalk {
   @@index([facultyId], map: "InvitedTalk_facultyId_fkey")
 }
 
-
 model AddtionalResponsibility {
   id                       Int                    @id @default(autoincrement())
   additionalResponsibility String
@@ -237,16 +236,16 @@ model FacultyResearchDetails {
   scopusId             String?                @unique
   publonsId            String?                @unique
   researchId           String?                @unique
+  conferenceandjournal ConferenceAndJournal[]
+  consultancy          Consultancy[]
   patent               Patent[]
   publications         Publication[]
-  conferenceandjournal ConferenceAndJournal[]
   researchGrant        ResearchGrant[]
-  consultancy          Consultancy[]
 }
 
 model Patent {
   id              String                 @id @default(uuid())
-  facultyId       String                 
+  facultyId       String
   areaOfResearch  String
   patentPeriod    String
   grantedYear     Int
@@ -277,7 +276,7 @@ model Publication {
 
 model ConferenceAndJournal {
   id                Int                    @id @default(autoincrement())
-  facultyId         String                 
+  facultyId         String
   role              String
   title             String
   journalName       String
@@ -289,9 +288,9 @@ model ConferenceAndJournal {
   author2           String?
   author3           String?
   author4           String?
-  publishedUnder    String? // e.g., WEB OF SCIENCE, SCOPUS
+  publishedUnder    String?
   impactFactor      Float?
-  quartile          String? // Q1, Q2, Q3
+  quartile          String?
   sponsor           String?
   venue             String
   fromDate          DateTime
@@ -303,7 +302,7 @@ model ConferenceAndJournal {
 
 model ResearchGrant {
   id                      Int                    @id @default(autoincrement())
-  facultyId               String                 
+  facultyId               String
   facultyResearchId       String
   name                    String
   sanctionedDate          DateTime
@@ -315,11 +314,13 @@ model ResearchGrant {
   phdAwarded              Boolean
   status                  String
   facultyResearch         FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
+
+  @@index([facultyId], map: "ResearchGrant_facultyId_fkey")
 }
 
 model Consultancy {
   id                      String                 @id @default(uuid())
-  facultyId               String                 
+  facultyId               String
   facultyResearchId       String
   faculty1                String
   faculty2                String
@@ -331,6 +332,8 @@ model Consultancy {
   coPrincipalInvestigator String?
   status                  String
   facultyResearch         FacultyResearchDetails @relation(fields: [facultyId], references: [facultyId])
+
+  @@index([facultyId], map: "Consultancy_facultyId_fkey")
 }
 
 model User {
@@ -340,3 +343,10 @@ model User {
   role      String @default("faculty")
   username  String
 }
+
+model Branch {
+  id         Int    @id @default(autoincrement())
+  branchName String
+  branchCode String
+}
+

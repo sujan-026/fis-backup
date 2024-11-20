@@ -126,8 +126,3 @@ const Header = () => {
 };
 
 export default Header;
-// function jwtDecode(user: string) {
-//   throw new Error("Function not implemented.");
-// }
-
-

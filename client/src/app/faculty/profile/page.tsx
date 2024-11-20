@@ -1837,7 +1837,7 @@ export default function FacultyProfile() {
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Children</p>
               <p className="font-medium text-gray-800">
-                {facultyDetails.data.children.join(", ") || "N/A"}
+                {facultyDetails.data.children || "N/A"}
               </p>
             </div>
           </div>
