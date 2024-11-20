@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+
 import { z } from "zod";
 import { facultyPersonalDetailsSchema } from "@/schemas/personal-details";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,8 +15,10 @@ import { Step } from "@/types/form";
 import { FormProvider } from "@/hooks/FormProvider";
 import Header from "@/components/ui/header";
 import { NavLinks } from "@/components/ui/nav-links";
+import { useRouter, useSearchParams } from "next/navigation";
 // import ProfilePhotoInput from "@/components/image";
 import axios from "axios";
+
 type Inputs = z.infer<typeof facultyPersonalDetailsSchema>;
 
 const steps: Step[] = [
@@ -23,6 +26,7 @@ const steps: Step[] = [
     id: "Step 1",
     name: "Personal Information",
     fields: [
+      
       "personalSchema.qualification",
       "personalSchema.title",
       "personalSchema.prefix",
@@ -118,6 +122,8 @@ export default function Form() {
   const [previousStep, setPreviousStep] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const delta = currentStep - previousStep;
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     control,
@@ -131,6 +137,7 @@ export default function Form() {
   } = useForm<Inputs>({
     resolver: zodResolver(facultyPersonalDetailsSchema),
   });
+
 
   const [isSameAddress, setIsSameAddress] = useState(false);
 
@@ -177,13 +184,22 @@ export default function Form() {
     control,
     name: "educationSchema",
   });
+  const facultyId = searchParams.get("facultyId");
+  useEffect(() => {
 
+    if (!facultyId) {
+      alert("Faculty ID is missing. Redirecting...");
+      router.push("/"); // Redirect to the dashboard or relevant page
+    }
+  }, [facultyId, router]);
+  
   const processForm: SubmitHandler<Inputs> = async (data) => {
     console.log("Form data:", data);
 
     try {
       // Send the schema data directly without nesting under combinedData
       const response = await axios.post("/api/facultypersonaldetails", {
+        facultyId : facultyId,
         personalSchema: data.personalSchema,
         financialSchema: data.financialSchema,
         educationSchema: data.educationSchema,
@@ -211,28 +227,17 @@ export default function Form() {
 
   const nextButtonFunction = async () => {
     const fields = steps[currentStep].fields;
-
+  
     const output = await trigger(fields as FieldName[], { shouldFocus: true });
-
-    if (!output) return;
-
+  
+    if (!output) return; // Prevent navigation if validation fails
+  
     if (currentStep < steps.length - 1) {
-      if (currentStep === steps.length - 2) {
-        const allFieldsValid = await trigger();
-        console.log("Submitting entire form");
-        if (allFieldsValid) {
-          console.log("Validation Successfull with all input data");
-          await handleSubmit(processForm)();
-        } else {
-          console.error(
-            "Validation Error with all input data with entire schema"
-          );
-        }
-      }
       setPreviousStep(currentStep);
       setCurrentStep((step) => step + 1);
     }
   };
+  
 
   const prevButtonFunction = () => {
     if (currentStep > 0) {
@@ -263,11 +268,6 @@ export default function Form() {
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   {/* <ProfilePhotoInput className="col-span-2" /> */}
-                  <FormField
-                    label="Qualification"
-                    stepsReference="personalSchema.qualification"
-                    type="text"
-                  />
 
                   <FormField
                     label="Title"
@@ -364,7 +364,13 @@ export default function Form() {
                     type="date"
                   />
 
-                  <div></div>
+                  <div>
+                    <FormField
+                      label="Qualification"
+                      stepsReference="personalSchema.qualification"
+                      type="text"
+                    />
+                  </div>
 
                   <div>
                     <label
@@ -1109,8 +1115,362 @@ export default function Form() {
                 </div>
               </motion.div>
             )}
+            {currentStep === 6 && (
+              <motion.div
+                initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                  Review and Submit
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Please review your details below. Click "Submit" to finalize
+                  your submission.
+                </p>
 
-            {currentStep === 6 && <div>Complete</div>}
+                {/* Preview Section */}
+                <div className="space-y-6 bg-gray-100 p-6 rounded-lg shadow">
+                  {/* Personal Information */}
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      Personal Information
+                    </h3>
+                    <table className="table-auto w-full text-left mt-2">
+                      <tbody>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Qualification:
+                          </td>
+                          <td>{watch("personalSchema.qualification")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Full Name:
+                          </td>
+                          <td>{`${watch("personalSchema.firstName")} ${watch(
+                            "personalSchema.lastName"
+                          )}`}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Email ID:
+                          </td>
+                          <td>{watch("personalSchema.emailId")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Contact Number:
+                          </td>
+                          <td>{watch("personalSchema.contactNo")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Alternate Contact Number:
+                          </td>
+                          <td>{watch("personalSchema.alternateContactNo")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Emergency Contact Number:
+                          </td>
+                          <td>{watch("personalSchema.emergencyContactNo")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Date of Birth:
+                          </td>
+                          <td>
+                            {watch("personalSchema.dob")
+                              ? new Date(
+                                  watch("personalSchema.dob")
+                                ).toLocaleDateString()
+                              : "N/A"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">Gender:</td>
+                          <td>{watch("personalSchema.gender")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Aadhar Number:
+                          </td>
+                          <td>{watch("personalSchema.aadhar")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            PAN Number:
+                          </td>
+                          <td>{watch("personalSchema.pan")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Nationality:
+                          </td>
+                          <td>{watch("personalSchema.nationality")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Religion:
+                          </td>
+                          <td>{watch("personalSchema.religion")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">Caste:</td>
+                          <td>{watch("personalSchema.caste")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Category:
+                          </td>
+                          <td>{watch("personalSchema.category")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Mother Tongue:
+                          </td>
+                          <td>{watch("personalSchema.motherTongue")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Specially Challenged:
+                          </td>
+                          <td>
+                            {watch("personalSchema.speciallyChanged")
+                              ? "Yes"
+                              : "No"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Specially Challenged Remarks:
+                          </td>
+                          <td>
+                            {watch("personalSchema.speciallyChangedRemarks")}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Languages to Speak:
+                          </td>
+                          <td>
+                            {watch("personalSchema.languagesToSpeak")?.join(
+                              ", "
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Languages to Read:
+                          </td>
+                          <td>
+                            {watch("personalSchema.languagesToRead")?.join(
+                              ", "
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Languages to Write:
+                          </td>
+                          <td>
+                            {watch("personalSchema.languagesToWrite")?.join(
+                              ", "
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Address */}
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      Address
+                    </h3>
+                    <table className="table-auto w-full text-left mt-2">
+                      <tbody>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            First Address:
+                          </td>
+                          <td>{`${watch(
+                            "personalSchema.firstAddressLine1"
+                          )}, ${watch(
+                            "personalSchema.firstAddressLine2"
+                          )}, ${watch(
+                            "personalSchema.firstAddressLine3"
+                          )}`}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Correspondence Address:
+                          </td>
+                          <td>{`${watch(
+                            "personalSchema.correspondenceAddressLine1"
+                          )}, ${watch(
+                            "personalSchema.correspondenceAddressLine2"
+                          )}, ${watch(
+                            "personalSchema.correspondenceAddressLine3"
+                          )}`}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Financial Details */}
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      Financial Details
+                    </h3>
+                    <table className="table-auto w-full text-left mt-2">
+                      <tbody>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Bank Name:
+                          </td>
+                          <td>{watch("financialSchema.bankName")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Account Number:
+                          </td>
+                          <td>{watch("financialSchema.accountNo")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            IFSC Code:
+                          </td>
+                          <td>{watch("financialSchema.ifscCode")}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Dependents */}
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      Dependents
+                    </h3>
+                    <table className="table-auto w-full text-left mt-2">
+                      <tbody>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Mother's Name:
+                          </td>
+                          <td>{watch("dependentsSchema.motherName")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Father's Name:
+                          </td>
+                          <td>{watch("dependentsSchema.fatherName")}</td>
+                        </tr>
+                        <tr>
+                          <td className="font-medium text-gray-700">
+                            Spouse's Name:
+                          </td>
+                          <td>{watch("dependentsSchema.spouseName")}</td>
+                        </tr>
+                        {watch("dependentsSchema.children")?.length > 0 && (
+                          <tr>
+                            <td className="font-medium text-gray-700">
+                              Children:
+                            </td>
+                            <td>
+                              <ul className="list-disc ml-4">
+                                {watch("dependentsSchema.children").map(
+                                  (child, index) => (
+                                    <li key={index}>
+                                      {child.name}, {child.gender},{" "}
+                                      {child.dob
+                                        ? new Date(
+                                            child.dob
+                                          ).toLocaleDateString()
+                                        : "N/A"}
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Education Details */}
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      Education Details
+                    </h3>
+                    <table className="table-auto w-full  mt-2">
+                      <thead>
+                        <tr>
+                          <th className="font-medium text-gray-700">Program</th>
+                          <th className="font-medium text-gray-700">USN</th>
+                          <th className="font-medium text-gray-700">
+                            Institution
+                          </th>
+                          <th className="font-medium text-gray-700">
+                            Specialization
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {watch("educationSchema")?.map((edu, index) => (
+                          <tr key={index}>
+                            <td>{edu.class}</td>
+                            <td>{edu.usn}</td>
+                            <td>{edu.institution}</td>
+                            <td>{edu.specialization}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="mt-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSubmit(async (data) => {
+                      try {
+                        const response = await axios.post(
+                          "/api/facultypersonaldetails",
+                          {
+                            facultyId: facultyId,
+                            personalSchema: data.personalSchema,
+                            financialSchema: data.financialSchema,
+                            educationSchema: data.educationSchema,
+                            dependentsSchema: data.dependentsSchema,
+                          }
+                        );
+
+                        if (response.data.success) {
+                          console.log(
+                            "Data saved successfully:",
+                            response.data
+                          );
+                          alert("Form submitted successfully!");
+                          //reset();
+                          setCurrentStep(0); // Go back to the first step
+                        } else {
+                          alert("Error submitting form. Please try again.");
+                        }
+                      } catch (error) {
+                        alert("An error occurred while submitting the form.");
+                      }
+                    })}
+                    className="bg-indigo-600 text-white px-6 py-2 rounded-md shadow-sm hover:bg-indigo-700"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </form>
         </FormProvider>
 

@@ -12,7 +12,7 @@ export function NavLinks() {
         className={`link hover:underline underline-offset-3 ${
           pathname === "/faculty/profile" ? "text-purple-500" : ""
         }`}
-        href="/"
+        href="/faculty"
       >
         Home
       </Link>

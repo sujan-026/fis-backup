@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-
+import { useEffect } from "react";
 import { z } from "zod";
 import { facultyResearchDetailsSchema } from "@/schemas/research-details";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import { FormProvider } from "@/hooks/FormProvider";
 import Header from "@/components/ui/header";
 import { NavLinks } from "@/components/ui/nav-links";
 import axios from "axios";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Inputs = z.infer<typeof facultyResearchDetailsSchema>;
 
@@ -74,6 +75,8 @@ export default function Form() {
   const [previousStep, setPreviousStep] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const delta = currentStep - previousStep;
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     control,
@@ -139,7 +142,14 @@ export default function Form() {
     append: appendPublications,
     remove: removePublications,
   } = useFieldArray({ control, name: "publicationsSchema" });
-
+  const facultyId = searchParams.get("facultyId");
+  useEffect(() => {
+    if (!facultyId) {
+      alert("Faculty ID is missing. Redirecting...");
+      router.push("/"); // Redirect to the dashboard or relevant page
+    }
+  }, [facultyId, router]);
+  
   const processForm: SubmitHandler<Inputs> = async (data) => {
     console.log(data);
     const submitresearch = await axios.post("/api/facultyresearchdetails", {
@@ -167,24 +177,12 @@ export default function Form() {
 
   const nextButtonFunction = async () => {
     const fields = steps[currentStep].fields;
-
+  
     const output = await trigger(fields as FieldName[], { shouldFocus: true });
-
-    if (!output) return;
-
+  
+    if (!output) return; // Prevent navigation if validation fails
+  
     if (currentStep < steps.length - 1) {
-      if (currentStep === steps.length - 2) {
-        const allFieldsValid = await trigger();
-        console.log("Submitting entire form");
-        if (allFieldsValid) {
-          console.log("Validation Successfull with all input data");
-          await handleSubmit(processForm)();
-        } else {
-          console.error(
-            "Validation Error with all input data with entire schema"
-          );
-        }
-      }
       setPreviousStep(currentStep);
       setCurrentStep((step) => step + 1);
     }
@@ -1334,6 +1332,8 @@ export default function Form() {
                   Publications
                 </h2>
 
+
+
                 {publications.map((field, index) => (
                   <div
                     key={field.id}
@@ -1425,17 +1425,225 @@ export default function Form() {
               </motion.div>
             )}
 
-            {currentStep === 7 && (
-              <motion.div
-                initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                  Complete
-                </h2>
-              </motion.div>
-            )}
+          {currentStep === 7 && (
+            <motion.div
+              initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                Review and Submit
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Review the entered data below. If everything looks correct, click "Submit" to finalize.
+              </p>
+
+              <div className="space-y-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                {/* Faculty Research Details */}
+                <div className="pb-4 border-b border-gray-300">
+                  <h3 className="text-lg font-bold text-gray-700 mb-3">Faculty Research Details</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <p><strong>VTU Faculty ID:</strong> {watch("facultyResearchSchema.vtuFacultyId")}</p>
+                    <p><strong>AICTE Faculty ID:</strong> {watch("facultyResearchSchema.aicteFacultyId")}</p>
+                    <p><strong>ORC ID:</strong> {watch("facultyResearchSchema.orcId")}</p>
+                    <p><strong>Scopus ID:</strong> {watch("facultyResearchSchema.scopusId")}</p>
+                    <p><strong>Publons/Web of Science ID:</strong> {watch("facultyResearchSchema.publonsAndWebOfScienceId")}</p>
+                  </div>
+                </div>
+
+                {/* National Journal Details */}
+                <div className="pb-4 border-b border-gray-300">
+                  <h3 className="text-lg font-bold text-gray-700 mb-3">National Journal Details</h3>
+                  <div className="space-y-2">
+                    {watch("nationalJournalDetailsSchema")?.map((journal, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300">
+                        <p><strong>Title:</strong> {journal.titleOfResearchPaper}</p>
+                        <p><strong>Journal:</strong> {journal.nameOfJournal}</p>
+                        <p><strong>Impact Factor:</strong> {journal.impactFactor}</p>
+                        <p><strong>Volume:</strong> {journal.volume}, <strong>Issue:</strong> {journal.issueNo}</p>
+                        <p><strong>Year:</strong> {journal.yearOfPublication}, <strong>Pages:</strong> {journal.pageNoFrom} - {journal.pageNoTo}</p>
+                        <p><strong>Authors:</strong> {journal.author01}, {journal.author02}, {journal.author03}, {journal.author04}</p>
+                        <p><strong>Published Under:</strong> {journal.publishedUnder}</p>
+                        <p><strong>Impact Factor:</strong> {journal.impactFactor}</p>
+
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* International Journal Details */}
+                <div className="pb-4 border-b border-gray-300">
+                  <h3 className="text-lg font-bold text-gray-700 mb-3">International Journal Details</h3>
+                  <div className="space-y-2">
+                    {watch("internationalJournalDetailsSchema")?.map((journal, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300">
+                        <p><strong>Title:</strong> {journal.titleOfResearchPaper}</p>
+                        <p><strong>Journal:</strong> {journal.nameOfJournal}</p>
+                        <p><strong>Impact Factor:</strong> {journal.impactFactor}</p>
+                        <p><strong>Volume:</strong> {journal.volume}, <strong>Issue:</strong> {journal.issueNo}</p>
+                        <p><strong>Year:</strong> {journal.yearOfPublication}, <strong>Pages:</strong> {journal.pageNoFrom} - {journal.pageNoTo}</p>
+                        <p><strong>Authors:</strong> {journal.author01}, {journal.author02}, {journal.author03}, {journal.author04}</p>
+                        <p><strong>Published Under:</strong> {journal.publishedUnder}</p>
+                        
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* National and International Conferences */}
+                <div className="pb-4 border-b border-gray-300">
+                  <h3 className="text-lg font-bold text-gray-700 mb-3">National and International Conferences</h3>
+                  {["nationalConferenceDetailsSchema", "internationalConferenceDetailsSchema"].map((conferenceType, typeIndex) => (
+                    <div key={typeIndex}>
+                      <h4 className="text-md font-semibold text-gray-600 mt-2">
+                        {conferenceType === "nationalConferenceDetailsSchema" ? "National Conferences" : "International Conferences"}
+                      </h4>
+                      <div className="space-y-2">
+                        {Array.isArray(watch(conferenceType as keyof Inputs)) && (watch(conferenceType as keyof Inputs) as any[])?.map((conference : any, index : any) => (
+                          <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300">
+                            <p><strong>Title:</strong> {conference.titleOfResearchPaper}</p>
+                            <p><strong>Journal:</strong> {conference.nameOfJournal}</p>
+                            <p><strong>Year:</strong> {conference.yearOfPublication}</p>
+                            <p><strong>Impact Factor:</strong> {conference.impactFactor}</p>
+                            <p><strong>Volume:</strong> {conference.volume}, <strong>Issue:</strong> {conference.issueNo}</p>
+                            <p><strong>Pages:</strong> {conference.pageNoFrom} - {conference.pageNoTo}</p>
+                            <p><strong>Authors:</strong> {conference.author01}, {conference.author02}, {conference.author03}, {conference.author04}</p>
+                            <p><strong>Published Under:</strong> {conference.publishedUnder}</p>
+                          
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Research Grants */}
+                <div className="pb-4 border-b border-gray-300">
+                  <h3 className="text-lg font-bold text-gray-700 mb-3">Research Grants</h3>
+                  <div className="space-y-2">
+                    {watch("researchGrantsSchema")?.map((grant, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300">
+                        <p><strong>Title:</strong> {grant.titleOfProject}</p>
+                        <p><strong>Funded By:</strong> {grant.fundedBy}</p>
+                        <p><strong>Amount:</strong> {grant.sanctionedAmount}</p>
+                        <p><strong>Status:</strong> {grant.status}</p>
+                        <p><strong>Time Period:</strong> {grant.timePeriodOfProject}</p>
+                        <p>
+                          <strong>Sanctioned Date:</strong>{" "}
+                          {new Date(grant.sanctionedDate).toDateString()}
+                        </p>
+                        <p><strong>Principal Investigator:</strong> {grant.principalInvestigatorDesignation}, {grant.principalInvestigatorInstitute}</p>
+                        <p><strong>Co-Principal Investigator:</strong> {grant.coPrincipalInvestigatorDesignation}, {grant.coPrincipalInvestigatorInstitute}</p>
+                        <p><strong>PhD Awarded:</strong> {grant.anyPhdAwarded}</p>
+
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Patents */}
+                <div className="pb-4 border-b border-gray-300">
+                  <h3 className="text-lg font-bold text-gray-700 mb-3">Patents</h3>
+                  <div className="space-y-2">
+                    {watch("patentsSchema")?.map((patent, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300">
+                        <p><strong>Title:</strong> {patent.titleOfResearchPatent}</p>
+                        <p><strong>Area:</strong> {patent.areaOfResearch}</p>
+                        <p><strong>Year:</strong> {patent.patentGrantedYear}</p>
+                        <p><strong>Period:</strong> {patent.patentPeriod}</p>
+                        <p><strong>Authors:</strong> {patent.author1}, {patent.author2}, {patent.author3}, {patent.author4}</p>
+
+                      </div>
+                    ))}
+                  </div>
+                  {/* Consultancy */}
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-700 mb-3">Consultancy</h3>
+                    <div className="space-y-2">
+                      {watch("consultancySchema")?.map((consultancy, index) => (
+                        <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300">
+                          <p><strong>Amount:</strong> {consultancy.sanctionedAmount}</p>
+                          <p><strong>Funded By:</strong> {consultancy.fundedBy}</p>
+                          <p><strong>Status:</strong> {consultancy.status}</p>
+                          <p><strong>Time Period:</strong> {consultancy.timePeriodOfProject}</p>
+                          <p>
+                            <strong>Sanctioned Date:</strong>{" "}
+                            {new Date(consultancy.sanctionedDate).toDateString()}
+                          </p>
+                          <p><strong>Principal Investigator:</strong> {consultancy.principalInvestigatorDesignation}, {consultancy.principalInvestigatorInstitute}</p>
+                          <p><strong>Co-Principal Investigator:</strong> {consultancy.coPrincipalInvestigatorDesignation}, {consultancy.coPrincipalInvestigatorInstitute}</p>
+
+                        </div>
+                      ))}
+                    </div>
+                    {/* Research Scholar */}
+                    <div>
+                       <h3 className="text-lg font-bold text-gray-700 mb-3">Research Scholar</h3>
+                       <div className="space-y-2">
+                         {watch("researchScholarDetailsSchema")?.map((scholar, index) => (
+                           <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300">
+                             <p><strong>Name:</strong> {scholar.nameOfResearchScholar}</p>
+                             <p><strong>University Seat Number:</strong> {scholar.universitySeatNumber}</p>
+                             <p><strong>Area of Research:</strong> {scholar.areaOfResearch}</p>
+                             <p>
+                              <strong>Sanctioned Date:</strong>{" "}
+                              {new Date(scholar.dateOfRegistration).toDateString()}
+                            </p>
+                             <p><strong>University of Registration:</strong> {scholar.universityOfRegistration}</p>
+                             <p><strong>Designation of Supervisor:</strong> {scholar.designationOfResearcher}</p>
+                             <p><strong>Name of Institute:</strong> {scholar.nameOfInstitute}</p>
+                             <p><strong>Progress of Research Work:</strong> {scholar.progressOfResearchWork}</p>
+                           </div>
+                         ))}
+                         </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Publications */}
+                <div className="pb-4">
+                  <h3 className="text-lg font-bold text-gray-700 mb-3">Publications</h3>
+                  <div className="space-y-2">
+                    {watch("publicationsSchema")?.map((publication, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-300">
+                        <p><strong>Name of Journal:</strong> {publication.nameOfJournal}</p>
+                        <p><strong>DOI:</strong> {publication.doi}</p>
+                        <p><strong>Impact Factor:</strong> {publication.impactFactor}</p>
+                        <p><strong>Volume and Page:</strong> {publication.volumeAndPage}</p>
+                        <p><strong>N/IN:</strong> {publication.n_In}</p>
+                        <p><strong>Type:</strong> {publication.typeOfPublication}</p>
+
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSubmit(async (data) => {
+                    try {
+                      const response = await axios.post("/api/facultyresearchdetails", {facultyId,data});
+                      if (response.status === 200) {
+                        alert("Form submitted successfully!");
+                        reset(); // Reset the form
+                        setCurrentStep(0); // Restart the form
+                      }
+                    } catch (error) {
+                      console.error(error);
+                      alert("An error occurred while submitting the form.");
+                    }
+                  })}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md shadow hover:bg-blue-700"
+                >
+                  Submit
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           </form>
         </FormProvider>
 

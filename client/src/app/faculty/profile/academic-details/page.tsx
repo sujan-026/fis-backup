@@ -1322,9 +1322,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { notFound } from "next/navigation";
+import { useSearchParams, useRouter, notFound } from "next/navigation";
 import { FacultyProfileNav } from "@/components/dashboard/facultyProfileNav";
-
 export default function AcademicProfile() {
   const [academicDetails, setAcademicDetails] = useState<{
     data: {
@@ -1415,6 +1414,8 @@ export default function AcademicProfile() {
   } | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams(); // For fetching query parameters
+  const router = useRouter(); // New router from `next/navigation`
 
   useEffect(() => {
     async function fetchAcademicDetails() {
@@ -1431,12 +1432,14 @@ export default function AcademicProfile() {
           `/api/facultyacademicdetails?facultyId=${facultyId}`
         );
         if (!response.ok) {
-          notFound();
+          router.push(`/faculty/faculty_reg/profile/academic-details?facultyId=${facultyId}`);
           return;
         }
 
         const data = await response.json();
         setAcademicDetails(data);
+
+
       } catch (error) {
         console.error("Error fetching academic details:", error);
       } finally {
@@ -1495,87 +1498,8 @@ export default function AcademicProfile() {
               {academicDetails.data.designation}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Level</p>
-            <p className="font-medium text-gray-800">
-              {academicDetails.data.level}
-            </p>
-          </div>
         </div>
 
-        {/* Responsibilities */}
-        {/* <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Responsibilities
-          </h2>
-          {academicDetails.data.responsibilities.map(
-            (responsibility, index) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium text-gray-800">
-                  {responsibility.additionalResponsibility} (
-                  {responsibility.level})
-                </p>
-                <p className="text-sm text-gray-500">
-                  From: {new Date(responsibility.fromDate).toLocaleDateString()}{" "}
-                  - To: {new Date(responsibility.toDate).toLocaleDateString()}
-                </p>
-              </div>
-            )
-          )}
-        </div> */}
-
-        {/* Awards and Recognition */}
-        {/* <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Awards and Recognition
-          </h2>
-          {academicDetails.data.awardsandrecognition.map((award, index) => (
-            <div key={index} className="mb-4">
-              <p className="font-medium text-gray-800">{award.awardReceived}</p>
-              <p className="text-sm text-gray-500">
-                {award.recognitionReceived}
-              </p>
-            </div>
-          ))}
-        </div> */}
-
-        {/* Events Attended */}
-        {/* <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Events Attended
-          </h2>
-          {academicDetails.data.eventsAttended.map((event, index) => (
-            <div key={index} className="mb-4">
-              <p className="font-medium text-gray-800">{event.nameofevent}</p>
-              <p className="text-sm text-gray-500">{event.typeofevent}</p>
-              <p className="text-sm text-gray-500">
-                {new Date(event.fromDate).toLocaleDateString()} -{" "}
-                {new Date(event.toDate).toLocaleDateString()}
-              </p>
-              <p className="text-sm text-gray-500">{event.organizer}</p>
-              <p className="text-sm text-gray-500">{event.venue}</p>
-            </div>
-          ))}
-        </div> */}
-
-        {/* Research Experience */}
-        {/* <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Research Experience
-          </h2>
-          {academicDetails.data.researchExperience.map((experience, index) => (
-            <div key={index} className="mb-4">
-              <p className="font-medium text-gray-800">
-                {experience.organization}
-              </p>
-              <p className="text-sm text-gray-500">{experience.designation}</p>
-              <p className="text-sm text-gray-500">
-                {new Date(experience.fromDate).toLocaleDateString()} -{" "}
-                {new Date(experience.toDate).toLocaleDateString()}
-              </p>
-            </div>
-          ))}
-        </div> */}
       </div>
     </div>
   );

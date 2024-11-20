@@ -1,6 +1,7 @@
 import prisma from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
+
 export async function POST(req: NextRequest) {
   try {
     // 1. Validate that we have a request body
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Validate required schema data exists
     if (!jsonData.personalSchema || !jsonData.financialSchema || 
-        !jsonData.educationSchema || !jsonData.dependentsSchema) {
+        !jsonData.educationSchema || !jsonData.dependentsSchema || !jsonData.facultyId) {
       return NextResponse.json(
         { 
           success: false, 
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
     });
 
     const newFacultyData = {
-      facultyId: '4237',
+      facultyId: jsonData.facultyId ?? "Unknown Faculty ID",
       qualification: personalSchema?.qualification ?? 'N/A',
       photo: null,
       title: personalSchema?.title ?? 'Mr',

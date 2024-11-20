@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/app/lib/db";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const branches = await prisma.Branch.findMany({
+    const branches = await prisma.branch.findMany({
       select: {
         branchName: true,
         branchCode: true,
@@ -17,19 +17,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    if (!personalDetails || !academicDetails) {
-      return NextResponse.json(
-        { success: false, error: "Faculty details not found" },
-        { status: 404 }
-      );
-    }
-
     // Combine the results and return
     return NextResponse.json({
       success: true,
       data: {
-        ...personalDetails,
-        ...academicDetails,
+        branches,
       },
     });
   } catch (error) {

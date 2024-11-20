@@ -1,8 +1,7 @@
 "use client";
-
 import { useState } from "react";
 import { motion } from "framer-motion";
-
+import { useEffect } from "react";
 import { z } from "zod";
 import { facultyAcademicDetailsSchema } from "@/schemas/academic-details";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +14,8 @@ import FormNavigation from "@/components/FormNavigation";
 import { FormProvider } from "@/hooks/FormProvider";
 import Header from "@/components/ui/header";
 import { NavLinks } from "@/components/ui/nav-links";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import axios from "axios";
 
 type Inputs = z.infer<typeof facultyAcademicDetailsSchema>;
@@ -75,7 +76,8 @@ export default function Form() {
   const [previousStep, setPreviousStep] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const delta = currentStep - previousStep;
-
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     control,
     register,
@@ -154,7 +156,14 @@ export default function Form() {
     append: appendAwards,
     remove: removeAwards,
   } = useFieldArray({ control, name: "awardsSchema" });
+  const facultyId = searchParams.get("facultyId");
+  useEffect(() => {
 
+    if (!facultyId) {
+      alert("Faculty ID is missing. Redirecting...");
+      router.push("/"); // Redirect to the dashboard or relevant page
+    }
+  }, [facultyId, router]);
   const processForm: SubmitHandler<Inputs> = async (data) => {
     console.log("All data", data);
     try {
@@ -189,38 +198,27 @@ export default function Form() {
     }
   };
   type FieldName = keyof Inputs;
-
   const nextButtonFunction = async () => {
     const fields = steps[currentStep].fields;
-
+  
     const output = await trigger(fields as FieldName[], { shouldFocus: true });
-
-    if (!output) return;
-
+  
+    if (!output) return; // Prevent navigation if validation fails
+  
     if (currentStep < steps.length - 1) {
-      if (currentStep === steps.length - 2) {
-        const allFieldsValid = await trigger();
-        console.log("Submitting entire form");
-        if (allFieldsValid) {
-          console.log("Validation Successfull with all input data");
-          await handleSubmit(processForm)();
-        } else {
-          console.error(
-            "Validation Error with all input data with entire schema"
-          );
-        }
-      }
       setPreviousStep(currentStep);
       setCurrentStep((step) => step + 1);
     }
   };
-
   const prevButtonFunction = () => {
     if (currentStep > 0) {
       setPreviousStep(currentStep);
       setCurrentStep((step) => step - 1);
     }
   };
+
+
+
 
   return (
     <div>
@@ -1042,17 +1040,234 @@ export default function Form() {
             </motion.div>
           )}
 
-          {currentStep === 5 && (
-            <motion.div
-              initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Complete
-              </h2>
-            </motion.div>
-          )}
+        {currentStep === 5 && (
+          <motion.div
+            initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              Review and Submit
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Please review the details below. If everything looks correct, click "Submit" to finalize your submission.
+            </p>
+
+            {/* Preview Section */}
+            <div className="space-y-6 bg-gray-100 p-6 rounded-lg shadow">
+              {/* Current Teaching Experience */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Current Teaching Experience</h3>
+                <table className="table-auto w-full text-left mt-2">
+                  <tbody>
+                    <tr>
+                      <td className="font-medium text-gray-700">Qualification:</td>
+                      <td>{watch("academicSchema.qualification")}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">AICTE Faculty ID:</td>
+                      <td>{watch("academicSchema.aicteFacultyId")}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">Department:</td>
+                      <td>{watch("academicSchema.department")}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">Designation:</td>
+                      <td>{watch("academicSchema.designation")}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">Level:</td>
+                      <td>{watch("academicSchema.level")}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">Date of Joining:</td>
+                      <td>{new Date(watch("teachingExperienceDrAITSchema.dateOfJoining")).toLocaleDateString()}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">Designation on Joining:</td>
+                      <td>{watch("teachingExperienceDrAITSchema.designationOnJoining")}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">Subjects Taught:</td>
+                      <td>{watch("areaOfSpecializationSchema.subjectsTaught")}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">Program:</td>
+                      <td>{watch("areaOfSpecializationSchema.program")}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-medium text-gray-700">No of Times:</td>
+                      <td>{watch("areaOfSpecializationSchema.noOfTimes")}</td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Previous Teaching Experience */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Previous Teaching Experience</h3>
+                <ul className="list-disc pl-5">
+                  {watch("previousTeachingExperienceSchema")?.map((exp, index) => (
+                    <li key={index}>
+                      <strong>Institute:</strong> {exp.instituteName}, 
+                      <strong> From:</strong> {new Date(exp.fromDate).toLocaleDateString()}, 
+                      <strong> To:</strong> {new Date(exp.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Industry Teaching Experience</h3>
+                <ul className="list-disc pl-5">
+                  {watch("teachingExperienceIndustrySchema")?.map((exp, index) => (
+                    <li key={index}>
+                      <strong>Organization:</strong> {exp.organization}, 
+                      <strong> From:</strong> {new Date(exp.fromDate).toLocaleDateString()}, 
+                      <strong> To:</strong> {new Date(exp.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Research Teaching Experience</h3>
+                <ul className="list-disc pl-5">
+                  {watch("teachingExperienceResearchSchema")?.map((exp, index) => (
+                    <li key={index}>
+                      <strong>Organization:</strong> {exp.organization}, 
+                      <strong> From:</strong> {new Date(exp.fromDate).toLocaleDateString()}, 
+                      <strong> To:</strong> {new Date(exp.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Events */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Events Attended</h3>
+                <ul className="list-disc pl-5">
+                  {watch("eventsAttendedSchema")?.map((event, index) => (
+                    <li key={index}>
+                      <strong>Title:</strong> {event.title}, 
+                      <strong> Organizer:</strong> {event.organizer}, 
+                      <strong> Dates:</strong> {new Date(event.fromDate).toLocaleDateString()} -{" "}
+                      {new Date(event.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Events Organized</h3>
+                <ul className="list-disc pl-5">
+                  {watch("eventsOrganizedSchema")?.map((event, index) => (
+                    <li key={index}>
+                      <strong>Title:</strong> {event.title}, 
+                      <strong> Sponsor:</strong> {event.sponsor}, 
+                      <strong> Dates:</strong> {new Date(event.fromDate).toLocaleDateString()} -{" "}
+                      {new Date(event.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Invited Talks</h3>
+                <ul className="list-disc pl-5">
+                  {watch("invitedTalksSchema")?.map((talk, index) => (
+                    <li key={index}>
+                      <strong>Title:</strong> {talk.title}, 
+                      <strong> Organizer:</strong> {talk.organizer}, 
+                      <strong> Dates:</strong> {new Date(talk.fromDate).toLocaleDateString()} -{" "}
+                      {new Date(talk.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {/* Awards and Recognitions */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Awards</h3>
+                <ul className="list-disc pl-5">
+                  {watch("awardsSchema")?.map((award, index) => (
+                    <li key={index}>{award.awardRecieved}</li>
+                  ))}
+                </ul>
+                <h3 className="text-xl font-semibold text-gray-800">Recognitions</h3>
+                <ul className="list-disc pl-5">
+                  {watch("recognitionsSchema")?.map((recognition, index) => (
+                    <li key={index}>{recognition.recognitionRecieved}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Responsibilities */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Responsibilities</h3>
+                <ul className="list-disc pl-5">
+                  {watch("responsibilitiesSchema")?.map((resp, index) => (
+                    <li key={index}>
+                      <strong>Responsibility:</strong> {resp.additionalResponsibilitiesHeld}, 
+                      <strong> Dates:</strong> {new Date(resp.fromDate).toLocaleDateString()} -{" "}
+                      {new Date(resp.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Extracurriculars</h3>
+                <ul className="list-disc pl-5">
+                  {watch("extracurricularsSchema")?.map((extra, index) => (
+                    <li key={index}>
+                      <strong>Title:</strong> {extra.titleOfEvent}, 
+                      <strong> Organizer:</strong> {extra.organizer}, 
+                      <strong> Dates:</strong> {new Date(extra.fromDate).toLocaleDateString()} -{" "}
+                      {new Date(extra.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">Outreach</h3>
+                <ul className="list-disc pl-5">
+                  {watch("outreachSchema")?.map((out, index) => (
+                    <li key={index}>
+                      <strong>Activity:</strong> {out.activity}, 
+                      <strong> Role:</strong> {out.role}, 
+                      <strong> Dates:</strong> {new Date(out.fromDate).toLocaleDateString()} -{" "}
+                      {new Date(out.toDate).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+              
+            {/* Submit Button */}
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={handleSubmit(async (data) => {
+                  try {
+                    console.log("Data", {data, facultyId});
+                    const response = await axios.post("/api/facultyacademicdetails", {facultyId
+                      ,data});
+                    if (response.status === 200) {
+                      console.log(response.data);
+                      alert("Form submitted successfully!");
+                      reset();
+                      setCurrentStep(0); // Restart the form
+                    }
+                  } catch (error) {
+                    console.error(error);
+                    alert("An error occurred while submitting the form.");
+                  }
+                })}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-md shadow-sm hover:bg-indigo-700"
+              >
+                Submit
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         </form>
       </FormProvider>
 

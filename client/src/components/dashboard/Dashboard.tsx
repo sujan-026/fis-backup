@@ -203,10 +203,7 @@ const Dashboard = () => {
   if (role === "hod" || role === "principal") {
     return (
       <div>
-        <Header />
-        {/* <div>{role === "hod" ? <DynamicDashboard /> : "All Faculty"}</div>
-        <div className="grid grid-cols-3 gap-4">{renderFacultyCards()}</div> */}
-
+        {!document.querySelector("header") && <Header />}
         <DynamicDashboard />
       </div>
     );

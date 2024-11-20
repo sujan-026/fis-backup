@@ -11,6 +11,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+
+  
     // 2. Parse JSON with error handling
     let jsonData;
     try {
@@ -23,20 +25,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const facultyId = "4237"; // You might want to generate this or get it from somewhere
-    const employeeId = "emp4237"; // Generating a default employee ID
-
+    const facultyId = jsonData.facultyId; 
+    console.log(jsonData)
+   // You might want to generate this or get it from somewhere
+    const employeeId = jsonData.facultyId; // Generating a default employee ID
+    console.log('qualification',jsonData.qualification);
     // 3. Create faculty academic details using provided academicSchema data
     const facultyAcademic = await prisma.facultyAcademicDetails.create({
-      data: {
-        facultyId: facultyId,
-        employeeId: jsonData.academicSchema?.employeeId || employeeId,
-        qualification:
-          jsonData.academicSchema?.qualification || "Not Specified",
-        department: jsonData.academicSchema?.department || "Not Specified",
-        designation: jsonData.academicSchema?.designation || "Not Specified",
-        level: jsonData.academicSchema?.level || "Not Specified",
-      },
+     data: {
+    facultyId: facultyId,
+    employeeId: jsonData.data.academicSchema?.employeeId || employeeId,
+    qualification: jsonData.data.academicSchema?.qualification || "Not Specified",
+    department: jsonData.data.academicSchema?.department || "Not Specified",
+    designation: jsonData.data.academicSchema?.designation || "Not Specified",
+    level: jsonData.data.academicSchema?.level || "Not Specified",
+  },
+      
     });
 
     // 4. Create teaching experience at Dr. AIT if provided
@@ -55,18 +59,18 @@ export async function POST(req: NextRequest) {
       await prisma.specialization.create({
         data: {
           facultyId: facultyAcademic.facultyId,
-          subjectsTaught: jsonData.areaOfSpecializationSchema.subjectsTaught,
-          program: jsonData.areaOfSpecializationSchema.program,
+          subjectsTaught: jsonData.data.areaOfSpecializationSchema.subjectsTaught,
+          program: jsonData.data.areaOfSpecializationSchema.program,
           numberOfTimes:
-            parseInt(jsonData.areaOfSpecializationSchema.numberOfTimes) || 0,
+            parseInt(jsonData.data.areaOfSpecializationSchema.numberOfTimes) || 0,
         },
       });
     }
 
     // 6. Create previous teaching experience
-    if (jsonData.previousTeachingExperienceSchema?.length > 0) {
+    if (jsonData.data.previousTeachingExperienceSchema?.length > 0) {
       await prisma.previousTeachingExperience.createMany({
-        data: jsonData.previousTeachingExperienceSchema.map((exp: any) => ({
+        data: jsonData.data.previousTeachingExperienceSchema.map((exp: any) => ({
           facultyId: facultyAcademic.facultyId,
           instituteName: exp.instituteName,
           fromDate: new Date(exp.fromDate),
@@ -76,9 +80,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 7. Create industry experiences
-    if (jsonData.teachingExperienceIndustrySchema?.length > 0) {
+    if (jsonData.data.teachingExperienceIndustrySchema?.length > 0) {
       await prisma.industryExperience.createMany({
-        data: jsonData.teachingExperienceIndustrySchema.map((exp: any) => ({
+        data: jsonData.data.teachingExperienceIndustrySchema.map((exp: any) => ({
           facultyId: facultyAcademic.facultyId,
           organization: exp.organization,
           designation: exp.designation,
@@ -89,9 +93,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 8. Create research experiences
-    if (jsonData.teachingExperienceResearchSchema?.length > 0) {
+    if (jsonData.data.teachingExperienceResearchSchema?.length > 0) {
       await prisma.researchExperience.createMany({
-        data: jsonData.teachingExperienceResearchSchema.map((exp: any) => ({
+        data: jsonData.data.teachingExperienceResearchSchema.map((exp: any) => ({
           facultyId: facultyAcademic.facultyId,
           organization: exp.organization,
           designation: exp.designation,
@@ -102,9 +106,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 9. Create events attended
-    if (jsonData.eventsAttendedSchema?.length > 0) {
+    if (jsonData.data.eventsAttendedSchema?.length > 0) {
       await prisma.eventAttended.createMany({
-        data: jsonData.eventsAttendedSchema.map((event: any) => ({
+        data: jsonData.data.eventsAttendedSchema.map((event: any) => ({
           facultyId: facultyAcademic.facultyId,
           typeofevent: event.typeOfEvent,
           nameofevent: event.title,
@@ -119,9 +123,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 10. Create events organized
-    if (jsonData.eventsOrganizedSchema?.length > 0) {
+    if (jsonData.data.eventsOrganizedSchema?.length > 0) {
       await prisma.eventOrganized.createMany({
-        data: jsonData.eventsOrganizedSchema.map((event: any) => ({
+        data: jsonData.data.eventsOrganizedSchema.map((event: any) => ({
           facultyId: facultyAcademic.facultyId,
           typeofevent: event.typeOfEvent,
           nameofevent: event.title,
@@ -136,9 +140,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 11. Create invited talks
-    if (jsonData.invitedTalksSchema?.length > 0) {
+    if (jsonData.data.invitedTalksSchema?.length > 0) {
       await prisma.invitedTalk.createMany({
-        data: jsonData.invitedTalksSchema.map((talk: any) => ({
+        data: jsonData.data.invitedTalksSchema.map((talk: any) => ({
           facultyId: facultyAcademic.facultyId,
           eventType: talk.typeOfEvent,
           topic: talk.title,
@@ -152,9 +156,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 12. Create additional responsibilities
-    if (jsonData.responsibilitiesSchema?.length > 0) {
+    if (jsonData.data.responsibilitiesSchema?.length > 0) {
       await prisma.addtionalResponsibility.createMany({
-        data: jsonData.responsibilitiesSchema.map((resp: any) => ({
+        data: jsonData.data.responsibilitiesSchema.map((resp: any) => ({
           facultyId: facultyAcademic.facultyId,
           additionalResponsibility: resp.additionalResponsibilitiesHeld,
           level: "Department", // Default value
@@ -165,9 +169,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 13. Create extracurricular activities
-    if (jsonData.extracurricularsSchema?.length > 0) {
+    if (jsonData.data.extracurricularsSchema?.length > 0) {
       await prisma.extracurricular.createMany({
-        data: jsonData.extracurricularsSchema.map((extra: any) => ({
+        data: jsonData.data.extracurricularsSchema.map((extra: any) => ({
           facultyId: facultyAcademic.facultyId,
           eventType: extra.typeOfEvent,
           eventTitle: extra.titleOfEvent,
@@ -181,9 +185,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 14. Create outreach activities
-    if (jsonData.outreachSchema?.length > 0) {
+    if (jsonData.data.outreachSchema?.length > 0) {
       await prisma.outreachActivity.createMany({
-        data: jsonData.outreachSchema.map((outreach: any) => ({
+        data: jsonData.data.outreachSchema.map((outreach: any) => ({
           facultyId: facultyAcademic.facultyId,
           activity: outreach.activity,
           role: outreach.role,
@@ -195,9 +199,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 15. Create awards and recognitions
-    if (jsonData.awardsSchema?.length > 0) {
+    if (jsonData.data.awardsSchema?.length > 0) {
       await prisma.awardAndRecognition.createMany({
-        data: jsonData.awardsSchema.map((award: any) => ({
+        data: jsonData.data.awardsSchema.map((award: any) => ({
           facultyId: facultyAcademic.facultyId,
           awardReceived: award.awardRecieved,
           recognitionReceived: "", // Default empty string
@@ -205,9 +209,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (jsonData.recognitionsSchema?.length > 0) {
+    if (jsonData.data.recognitionsSchema?.length > 0) {
       await prisma.awardAndRecognition.createMany({
-        data: jsonData.recognitionsSchema.map((recognition: any) => ({
+        data: jsonData.data.recognitionsSchema.map((recognition: any) => ({
           facultyId: facultyAcademic.facultyId,
           recognitionReceived: recognition.recognitionRecieved,
           awardReceived: "", // Default empty string
@@ -244,6 +248,7 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const facultyId = url.searchParams.get("facultyId");
     if (!facultyId) {
+
       return NextResponse.json(
         { success: false, error: "Faculty ID is required" },
         { status: 400 }
